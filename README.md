@@ -1,1462 +1,701 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Trivilocura  </title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>💖 TriviLocura 💖</title>
+<style>
+    /* Reset */
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
 
-        body {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+    /* Animated rainbow background */
+    :root{
+        --card-bg: rgba(255,255,255,0.95);
+    }
+    body{
+        min-height:100vh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:20px;
+        background: linear-gradient(120deg,#ff9a9e 0%, #fecfef 10%, #f6d365 20%, #fda085 30%, #a1c4fd 45%, #c2e9fb 55%, #d4fc79 70%, #96e6a1 85%, #fbc2eb 100%);
+        background-size: 400% 400%;
+        animation: rainbow 18s linear infinite;
+    }
+    @keyframes rainbow{
+        0%{background-position:0% 50%}
+        50%{background-position:100% 50%}
+        100%{background-position:0% 50%}
+    }
 
-        .container {
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 900px;
-            overflow: hidden;
-        }
+    /* Container */
+    .container{
+        width:100%;
+        max-width:980px;
+        background: var(--card-bg);
+        border-radius:16px;
+        box-shadow:0 15px 40px rgba(0,0,0,0.18);
+        overflow:hidden;
+        position:relative;
+    }
 
-        .header {
-            background: linear-gradient(to right, #4a00e0, #8e2de2);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
+    /* Header */
+    .header{
+        padding:18px 22px;
+        text-align:center;
+        background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0));
+        border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .title{
+        font-size:1.9rem;
+        font-weight:800;
+        letter-spacing:0.6px;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        gap:10px;
+    }
+    .title .heart{
+        color:#ff5c9e;
+        font-size:1.3rem;
+        transform:translateY(-2px);
+    }
+    .subtitle{ color:#666; margin-top:6px; font-size:0.95rem; opacity:0.95 }
 
-        .header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-        }
+    /* Timer / progress */
+    .timer-container{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:12px 20px;
+        background:linear-gradient(to right, rgba(255,255,255,0.6), rgba(255,255,255,0.4));
+        border-bottom:1px solid rgba(0,0,0,0.04);
+    }
+    .timer{ font-weight:700; color:#d6336c; background:#fff; padding:6px 12px;border-radius:20px; box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+    .progress{ font-weight:600; color:#333 }
 
-        .header p {
-            font-size: 1rem;
-            opacity: 0.9;
-        }
+    /* Selection screen */
+    .category-selection{ padding:26px; text-align:center }
+    .category-title{ font-size:1.4rem; font-weight:700; margin-bottom:16px; color:#222 }
+    .categories-container{ display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); margin:14px 0 22px }
+    .category-card{
+        background:linear-gradient(180deg,rgba(255,255,255,0.7),rgba(255,255,255,0.5));
+        padding:14px;border-radius:12px;border:2px solid rgba(0,0,0,0.04);
+        cursor:pointer;transition:transform .18s ease, box-shadow .18s ease;
+        display:flex;flex-direction:column;align-items:center;gap:8px;
+        min-height:84px;justify-content:center;
+    }
+    .category-card:hover{ transform:translateY(-6px); box-shadow:0 10px 25px rgba(0,0,0,0.08) }
+    .category-card.selected{ outline:3px solid rgba(0,0,0,0.06); transform:translateY(-2px); }
+    .category-icon{ font-size:1.6rem }
+    .category-name{ font-weight:700 }
 
-        .timer-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
-        }
+    /* Quiz screen */
+    .quiz-container{ padding:22px 26px 30px }
+    .question-container{ margin-bottom:18px }
+    .question-number{ color:#6c757d; margin-bottom:6px }
+    .question-text{ font-size:1.25rem; font-weight:700; color:#222; line-height:1.4; margin-bottom:10px }
+    .category-tag{ display:inline-block; padding:6px 10px; border-radius:999px; font-weight:700; color:#fff; margin-bottom:10px }
 
-        .timer {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #dc3545;
-            background-color: #fff;
-            padding: 5px 15px;
-            border-radius: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
+    .options-container{ display:flex; flex-direction:column; gap:12px; margin-top:10px }
+    .option{
+        display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;border:2px solid rgba(0,0,0,0.06);
+        background:linear-gradient(180deg, #fff, #f8f9fb); cursor:pointer; transition:transform .12s ease, box-shadow .12s ease;
+    }
+    .option:hover{ transform:translateY(-4px); box-shadow:0 8px 20px rgba(0,0,0,0.06) }
+    .option.selected{ background: linear-gradient(90deg,#6a11cb,#2575fc); color:#fff; border-color:transparent }
+    .option-letter{ width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;background:#eef2ff }
+    .option.selected .option-letter{ background: rgba(255,255,255,0.25) }
 
-        .progress {
-            font-size: 1rem;
-            color: #495057;
-        }
+    /* Navigation buttons */
+    .navigation{ display:flex; justify-content:space-between; gap:8px; margin-top:18px }
+    .btn{ padding:12px 20px;border-radius:10px;border:none;font-weight:800; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,0.06) }
+    .btn:disabled{ opacity:0.5; cursor:not-allowed; transform:none; box-shadow:none }
+    .btn-prev{ background:#adb5bd; color:#fff }
+    .btn-next{ background: linear-gradient(90deg,#4a00e0,#8e2de2); color:#fff }
+    .btn-start{ background: linear-gradient(90deg,#ff7eb3,#ff758c); color:#fff; padding:14px 28px; font-size:1.05rem }
 
-        .category-selection {
-            padding: 30px;
-            text-align: center;
-        }
+    /* Result screen */
+    .results-container{ padding:22px }
+    .results-title{ font-size:1.6rem; color:#6a11cb; font-weight:800; text-align:center }
+    .score{ font-size:2.4rem; font-weight:900; color:#4a00e0; text-align:center; margin:10px 0 6px }
+    .results-summary{ margin-top:18px; background:#fff; padding:16px; border-radius:10px; max-height:360px; overflow:auto; border:1px solid rgba(0,0,0,0.04) }
+    .result-item{ padding:12px;border-bottom:1px dashed rgba(0,0,0,0.04) }
+    .result-question{ font-weight:800; margin-bottom:6px }
+    .correct{ color:#28a745; font-weight:800 }
+    .incorrect{ color:#dc3545; font-weight:800 }
 
-        .category-title {
-            font-size: 1.5rem;
-            color: #343a40;
-            margin-bottom: 20px;
-        }
+    /* Feedback overlay */
+    .feedback{
+        position: absolute;
+        left:50%;
+        transform:translateX(-50%);
+        top:26%;
+        z-index:60;
+        min-width:260px;
+        max-width:80%;
+        text-align:center;
+        padding:14px 18px;
+        border-radius:12px;
+        display:none;
+        align-items:center;
+        gap:10px;
+        box-shadow:0 14px 40px rgba(0,0,0,0.18);
+        font-weight:900;
+        font-size:1.05rem;
+    }
+    .feedback.show{ display:flex; animation:pop .32s ease both }
+    @keyframes pop{ from{ transform:translateX(-50%) scale(0.8); opacity:0 } to{ transform:translateX(-50%) scale(1); opacity:1 } }
 
-        .categories-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
+    .feedback.correct{ background: linear-gradient(90deg,#e9ffea,#d6ffe0); color:#1f7a3a }
+    .feedback.incorrect{ background: linear-gradient(90deg,#ffe7e7,#ffdcdc); color:#8a1f2b }
 
-        .category-card {
-            background-color: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
+    /* Confetti canvas covers whole container */
+    #confetti-canvas{ position:absolute; inset:0; pointer-events:none; z-index:50 }
 
-        .category-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
+    /* Shake animation for incorrect */
+    .shake{ animation:shake .45s ease both }
+    @keyframes shake{
+        10%,90%{ transform:translateX(-1px) }
+        20%,80%{ transform:translateX(2px) }
+        30%,50%,70%{ transform:translateX(-4px) }
+        40%,60%{ transform:translateX(4px) }
+    }
 
-        .category-card.selected {
-            border-color: #4a00e0;
-            background-color: #e8e2ff;
-        }
-
-        .category-icon {
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-
-        .category-name {
-            font-weight: 600;
-            color: #343a40;
-        }
-
-        .quiz-container {
-            padding: 30px;
-        }
-
-        .question-container {
-            margin-bottom: 25px;
-        }
-
-        .question-number {
-            font-size: 0.9rem;
-            color: #6c757d;
-            margin-bottom: 5px;
-        }
-
-        .question-text {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #343a40;
-            margin-bottom: 20px;
-            line-height: 1.4;
-        }
-
-        .question-image {
-            width: 100%;
-            max-height: 250px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .options-container {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .option {
-            padding: 15px;
-            background-color: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .option:hover {
-            background-color: #e9ecef;
-            transform: translateY(-2px);
-        }
-
-        .option.selected {
-            background-color: #4a00e0;
-            color: white;
-            border-color: #4a00e0;
-        }
-
-        .option-letter {
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            width: 30px;
-            height: 30px;
-            background-color: #e9ecef;
-            border-radius: 50%;
-            margin-right: 10px;
-            font-weight: bold;
-        }
-
-        .option.selected .option-letter {
-            background-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .navigation {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-        }
-
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-prev {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        .btn-next {
-            background-color: #4a00e0;
-            color: white;
-        }
-
-        .btn-start {
-            background-color: #4a00e0;
-            color: white;
-            padding: 15px 40px;
-            font-size: 1.1rem;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-
-        .btn:disabled {
-            background-color: #e9ecef;
-            color: #adb5bd;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .results-container {
-            padding: 30px;
-            text-align: center;
-        }
-
-        .results-title {
-            font-size: 2rem;
-            color: #4a00e0;
-            margin-bottom: 20px;
-        }
-
-        .score {
-            font-size: 3rem;
-            font-weight: bold;
-            color: #4a00e0;
-            margin: 20px 0;
-        }
-
-        .results-summary {
-            text-align: left;
-            margin-top: 30px;
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .result-item {
-            padding: 15px;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .result-item:last-child {
-            border-bottom: none;
-        }
-
-        .result-question {
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .result-image {
-            width: 100%;
-            max-height: 150px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-
-        .result-answer {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 5px;
-        }
-
-        .correct {
-            color: #28a745;
-        }
-
-        .incorrect {
-            color: #dc3545;
-        }
-
-        .btn-restart {
-            background-color: #4a00e0;
-            color: white;
-            margin-top: 20px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .category-tag {
-            display: inline-block;
-            background-color: #e9ecef;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            margin-bottom: 10px;
-        }
-
-        @media (max-width: 600px) {
-            .header h1 {
-                font-size: 1.5rem;
-            }
-            
-            .quiz-container {
-                padding: 20px;
-            }
-            
-            .question-text {
-                font-size: 1.1rem;
-            }
-            
-            .btn {
-                padding: 10px 20px;
-            }
-            
-            .score {
-                font-size: 2.5rem;
-            }
-            
-            .result-answer {
-                flex-direction: column;
-                gap: 5px;
-            }
-            
-            .categories-container {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    /* Mobile tweaks */
+    @media(max-width:640px){
+        .title{ font-size:1.4rem }
+        .question-text{ font-size:1.05rem }
+        .btn{ padding:10px 14px }
+    }
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Selecciona una categoría o elige preguntas mixtas</h1>
+<div class="container" id="app">
+    <canvas id="confetti-canvas"></canvas>
 
+    <div class="header">
+        <div class="title">
+            <span class="heart">💗</span>
+            <span>TriviLocura</span>
+            <span class="heart">💗</span>
         </div>
-        
-        <!-- Pantalla de selección de categorías -->
-        <div id="category-screen" class="category-selection">
-            <h2 class="category-title">Elige una categoría para estudiar</h2>
-            <div class="categories-container" id="categories-container">
-                <!-- Las categorías se generarán con JavaScript -->
-            </div>
-            <button id="start-btn" class="btn btn-start" disabled>Comenzar Cuestionario</button>
+        <div class="subtitle">Elige una categoría y demuestra lo que sabes — ¡diviértete! 🎉</div>
+    </div>
+
+    <!-- Timer / progress -->
+    <div class="timer-container">
+        <div class="progress">Pregunta <span id="current-question">1</span> de 10</div>
+        <div class="timer">Tiempo: <span id="time">01:00</span></div>
+    </div>
+
+    <!-- Category selection -->
+    <div id="category-screen" class="category-selection">
+        <h2 class="category-title">💖 Elige una categoría para estudiar</h2>
+        <div class="categories-container" id="categories-container"></div>
+        <button id="start-btn" class="btn btn-start" disabled>Comenzar Cuestionario</button>
+    </div>
+
+    <!-- Quiz screen -->
+    <div id="quiz-screen" class="quiz-container hidden" style="display:none">
+        <div class="question-container">
+            <div class="question-number">Pregunta <span id="question-number">1</span></div>
+            <div class="category-tag" id="question-category"></div>
+            <div class="question-text" id="question-text"></div>
         </div>
-        
-        <!-- Pantalla del cuestionario -->
-        <div id="quiz-screen" class="quiz-container hidden">
-            <div class="timer-container">
-                <div class="progress">Pregunta <span id="current-question">1</span> de 10</div>
-                <div class="timer">Tiempo: <span id="time">01:00</span></div>
-            </div>
-            
-            <div class="question-container">
-                <div class="question-number">Pregunta <span id="question-number">1</span></div>
-                <div class="category-tag" id="question-category"></div>
-                <div class="question-text" id="question-text"></div>
-                <img class="question-image" id="question-image" src="" alt="Imagen de la pregunta">
-            </div>
-            
-            <div class="options-container" id="options-container"></div>
-            
-            <div class="navigation">
-                <button id="prev-btn" class="btn btn-prev" disabled>Anterior</button>
-                <button id="next-btn" class="btn btn-next">Siguiente</button>
-            </div>
-        </div>
-        
-        <!-- Pantalla de resultados -->
-        <div id="results-screen" class="results-container hidden">
-            <h2 class="results-title">Resultados del Cuestionario</h2>
-            <div class="score" id="final-score">0/10</div>
-            <p id="result-message"></p>
-            
-            <div class="results-summary" id="results-summary"></div>
-            
-            <button id="restart-btn" class="btn btn-restart">Volver a Seleccionar Categorías</button>
+
+        <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+
+        <div class="options-container" id="options-container"></div>
+
+        <div class="navigation">
+            <button id="prev-btn" class="btn btn-prev" disabled>Anterior</button>
+            <button id="next-btn" class="btn btn-next">Siguiente</button>
         </div>
     </div>
 
-    <script>
-        // Definición de categorías disponibles
-        const categories = [
-            { id: 'matematicas', name: 'Matemáticas', color: '#FF6B6B', icon: '∑' },
-            { id: 'ciencias', name: 'Ciencias', color: '#4ECDC4', icon: '🔬' },
-            { id: 'historia', name: 'Historia', color: '#FFD166', icon: '📜' },
-            { id: 'geografia', name: 'Geografía', color: '#06D6A0', icon: '🌎' },
-            { id: 'literatura', name: 'Literatura', color: '#118AB2', icon: '📚' },
-            { id: 'arte', name: 'Arte', color: '#073B4C', icon: '🎨' },
-            { id: 'deportes', name: 'Deportes', color: '#EF476F', icon: '⚽' },
-            { id: 'tecnologia', name: 'Tecnología', color: '#7209B7', icon: '💻' },
-            { id: 'mixtas', name: 'Preguntas Mixtas', color: '#FF9E64', icon: '🎲' }
-        ];
+    <!-- Results screen -->
+    <div id="results-screen" class="results-container hidden" style="display:none">
+        <h2 class="results-title">Resultados del Cuestionario</h2>
+        <div class="score" id="final-score">0/10</div>
+        <p id="result-message" style="text-align:center"></p>
+        <div class="results-summary" id="results-summary"></div>
+        <div style="text-align:center; margin-top:14px;">
+            <button id="restart-btn" class="btn btn-start">Volver a Seleccionar Categorías</button>
+        </div>
+    </div>
+</div>
 
-        // Generar 10 preguntas para cada categoría
-        function generateQuestions() {
-            return [
-                // MATEMÁTICAS (10 preguntas)
-                {
-                    id: 1,
-                    question: "¿Cuál es el resultado de 15 + 27?",
-                    options: ["40", "42", "38", "45"],
-                    correct: 1,
-                    explanation: "15 + 27 = 42",
-                    category: "matematicas",
-                    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 2,
-                    question: "¿Cuánto es 8 × 7?",
-                    options: ["54", "56", "58", "60"],
-                    correct: 1,
-                    explanation: "8 × 7 = 56",
-                    category: "matematicas",
-                    image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 3,
-                    question: "¿Cuál es el valor de π (pi) aproximadamente?",
-                    options: ["2.14", "3.14", "4.14", "3.41"],
-                    correct: 1,
-                    explanation: "π (pi) es aproximadamente 3.14159",
-                    category: "matematicas",
-                    image: "https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 4,
-                    question: "¿Cuánto es 144 ÷ 12?",
-                    options: ["10", "11", "12", "13"],
-                    correct: 2,
-                    explanation: "144 ÷ 12 = 12",
-                    category: "matematicas",
-                    image: "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 5,
-                    question: "¿Cuál es el área de un cuadrado de 5 cm de lado?",
-                    options: ["20 cm²", "25 cm²", "30 cm²", "35 cm²"],
-                    correct: 1,
-                    explanation: "Área = lado × lado = 5 × 5 = 25 cm²",
-                    category: "matematicas",
-                    image: "https://images.unsplash.com/photo-1588666309990-d68f08e3d4a6?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 6,
-                    question: "¿Qué porcentaje es 25 de 100?",
-                    options: ["15%", "20%", "25%", "30%"],
-                    correct: 2,
-                    explanation: "25/100 = 0.25 = 25%",
-                    category: "matematicas",
-                    image: "https://images.unsplash.com/photo-1587440871875-191322ee64b0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 7,
-                    question: "¿Cuánto es 3² + 4²?",
-                    options: ["12", "18", "24", "25"],
-                    correct: 3,
-                    explanation: "3² = 9, 4² = 16, 9 + 16 = 25",
-                    category: "matematicas",
-                    image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 8,
-                    question: "¿Qué fracción es equivalente a 0.75?",
-                    options: ["1/4", "1/2", "3/4", "4/5"],
-                    correct: 2,
-                    explanation: "0.75 = 75/100 = 3/4",
-                    category: "matematicas",
-                    image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 9,
-                    question: "¿Cuál es el MCD de 12 y 18?",
-                    options: ["2", "3", "6", "9"],
-                    correct: 2,
-                    explanation: "Máximo Común Divisor de 12 y 18 es 6",
-                    category: "matematicas",
-                    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 10,
-                    question: "¿Cuánto es 7 × 8 + 5?",
-                    options: ["56", "61", "66", "71"],
-                    correct: 1,
-                    explanation: "7 × 8 = 56, 56 + 5 = 61",
-                    category: "matematicas",
-                    image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
+<script>
+/* -------------------------
+   Datos de categorías y preguntas (sin imágenes)
+   ------------------------- */
+const categories = [
+    { id: 'matematicas', name: 'Matemáticas', color: '#FF6B6B', icon: '∑' },
+    { id: 'ciencias', name: 'Ciencias', color: '#4ECDC4', icon: '🔬' },
+    { id: 'historia', name: 'Historia', color: '#FFD166', icon: '📜' },
+    { id: 'geografia', name: 'Geografía', color: '#06D6A0', icon: '🌎' },
+    { id: 'literatura', name: 'Literatura', color: '#118AB2', icon: '📚' },
+    { id: 'arte', name: 'Arte', color: '#073B4C', icon: '🎨' },
+    { id: 'deportes', name: 'Deportes', color: '#EF476F', icon: '⚽' },
+    { id: 'tecnologia', name: 'Tecnología', color: '#7209B7', icon: '💻' },
+    { id: 'mixtas', name: 'Preguntas Mixtas', color: '#FF9E64', icon: '🎲' }
+];
 
-                // CIENCIAS (10 preguntas)
-                {
-                    id: 11,
-                    question: "¿Qué planeta es conocido como el planeta rojo?",
-                    options: ["Venus", "Júpiter", "Marte", "Saturno"],
-                    correct: 2,
-                    explanation: "Marte es conocido como el planeta rojo debido a su apariencia rojiza",
-                    category: "ciencias",
-                    image: "https://images.unsplash.com/photo-1614314107768-6018061b5b6e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 12,
-                    question: "¿Qué gas necesitan las plantas para realizar la fotosíntesis?",
-                    options: ["Oxígeno", "Nitrógeno", "Dióxido de carbono", "Hidrógeno"],
-                    correct: 2,
-                    explanation: "Las plantas utilizan dióxido de carbono para la fotosíntesis",
-                    category: "ciencias",
-                    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 13,
-                    question: "¿Cuál es el elemento químico más abundante en el universo?",
-                    options: ["Oxígeno", "Carbono", "Hierro", "Hidrógeno"],
-                    correct: 3,
-                    explanation: "El hidrógeno es el elemento más abundante en el universo",
-                    category: "ciencias",
-                    image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 14,
-                    question: "¿Qué partícula subatómica tiene carga positiva?",
-                    options: ["Electrón", "Neutrón", "Protón", "Fotón"],
-                    correct: 2,
-                    explanation: "El protón tiene carga positiva",
-                    category: "ciencias",
-                    image: "https://images.unsplash.com/photo-1507146426996-ef05306b995a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 15,
-                    question: "¿Qué órgano bombea sangre en el cuerpo humano?",
-                    options: ["Pulmón", "Hígado", "Corazón", "Cerebro"],
-                    correct: 2,
-                    explanation: "El corazón es el órgano que bombea sangre por todo el cuerpo",
-                    category: "ciencias",
-                    image: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 16,
-                    question: "¿Qué planeta tiene anillos visibles?",
-                    options: ["Marte", "Venus", "Saturno", "Mercurio"],
-                    correct: 2,
-                    explanation: "Saturno tiene anillos visibles desde la Tierra con telescopio",
-                    category: "ciencias",
-                    image: "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 17,
-                    question: "¿Qué científico formuló la teoría de la relatividad?",
-                    options: ["Newton", "Einstein", "Galileo", "Darwin"],
-                    correct: 1,
-                    explanation: "Albert Einstein formuló la teoría de la relatividad",
-                    category: "ciencias",
-                    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 18,
-                    question: "¿Qué gas es esencial para la respiración humana?",
-                    options: ["Nitrógeno", "Oxígeno", "Dióxido de carbono", "Hidrógeno"],
-                    correct: 1,
-                    explanation: "El oxígeno es esencial para la respiración humana",
-                    category: "ciencias",
-                    image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 19,
-                    question: "¿Qué planeta es el más cercano al Sol?",
-                    options: ["Venus", "Mercurio", "Tierra", "Marte"],
-                    correct: 1,
-                    explanation: "Mercurio es el planeta más cercano al Sol",
-                    category: "ciencias",
-                    image: "https://images.unsplash.com/photo-1614314107768-6018061b5b6e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 20,
-                    question: "¿Qué tipo de animal es una ballena?",
-                    options: ["Pez", "Anfibio", "Mamífero", "Reptil"],
-                    correct: 2,
-                    explanation: "La ballena es un mamífero marino",
-                    category: "ciencias",
-                    image: "https://images.unsplash.com/photo-1551966775-a4ddc8df052b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
+function generateQuestions(){
+    return [
+        // MATEMÁTICAS (10)
+        { id:1, question:"¿Cuál es el resultado de 15 + 27?", options:["40","42","38","45"], correct:1, explanation:"15 + 27 = 42", category:"matematicas" },
+        { id:2, question:"¿Cuánto es 8 × 7?", options:["54","56","58","60"], correct:1, explanation:"8 × 7 = 56", category:"matematicas" },
+        { id:3, question:"¿Cuál es el valor de π (pi) aproximadamente?", options:["2.14","3.14","4.14","3.41"], correct:1, explanation:"π ≈ 3.14159", category:"matematicas" },
+        { id:4, question:"¿Cuánto es 144 ÷ 12?", options:["10","11","12","13"], correct:2, explanation:"144 ÷ 12 = 12", category:"matematicas" },
+        { id:5, question:"¿Cuál es el área de un cuadrado de 5 cm de lado?", options:["20 cm²","25 cm²","30 cm²","35 cm²"], correct:1, explanation:"Área = 5 × 5 = 25 cm²", category:"matematicas" },
+        { id:6, question:"¿Qué porcentaje es 25 de 100?", options:["15%","20%","25%","30%"], correct:2, explanation:"25/100 = 25%", category:"matematicas" },
+        { id:7, question:"¿Cuánto es 3² + 4²?", options:["12","18","24","25"], correct:3, explanation:"9 + 16 = 25", category:"matematicas" },
+        { id:8, question:"¿Qué fracción es equivalente a 0.75?", options:["1/4","1/2","3/4","4/5"], correct:2, explanation:"0.75 = 3/4", category:"matematicas" },
+        { id:9, question:"¿Cuál es el MCD de 12 y 18?", options:["2","3","6","9"], correct:2, explanation:"MCD(12,18) = 6", category:"matematicas" },
+        { id:10, question:"¿Cuánto es 7 × 8 + 5?", options:["56","61","66","71"], correct:1, explanation:"7×8=56; 56+5=61", category:"matematicas" },
 
-                // HISTORIA (10 preguntas)
-                {
-                    id: 21,
-                    question: "¿En qué año llegó Colón a América?",
-                    options: ["1492", "1502", "1482", "1512"],
-                    correct: 0,
-                    explanation: "Cristóbal Colón llegó a América en 1492",
-                    category: "historia",
-                    image: "https://images.unsplash.com/photo-1577985057588-882ec0b8c0b0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 22,
-                    question: "¿Quién pintó la Mona Lisa?",
-                    options: ["Miguel Ángel", "Leonardo da Vinci", "Picasso", "Van Gogh"],
-                    correct: 1,
-                    explanation: "La Mona Lisa fue pintada por Leonardo da Vinci",
-                    category: "historia",
-                    image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 23,
-                    question: "¿En qué año comenzó la Primera Guerra Mundial?",
-                    options: ["1912", "1914", "1916", "1918"],
-                    correct: 1,
-                    explanation: "La Primera Guerra Mundial comenzó en 1914",
-                    category: "historia",
-                    image: "https://images.unsplash.com/photo-1589656043592-47d46f5982d6?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 24,
-                    question: "¿Quién fue el primer presidente de Estados Unidos?",
-                    options: ["Thomas Jefferson", "Abraham Lincoln", "George Washington", "John Adams"],
-                    correct: 2,
-                    explanation: "George Washington fue el primer presidente de Estados Unidos",
-                    category: "historia",
-                    image: "https://images.unsplash.com/photo-1565374397291-abf6075d6a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 25,
-                    question: "¿Qué civilización construyó las pirámides de Egipto?",
-                    options: ["Romanos", "Griegos", "Egipcios", "Mayas"],
-                    correct: 2,
-                    explanation: "Los antiguos egipcios construyeron las pirámides",
-                    category: "historia",
-                    image: "https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 26,
-                    question: "¿En qué año cayó el Imperio Romano de Occidente?",
-                    options: ["376 d.C.", "476 d.C.", "576 d.C.", "676 d.C."],
-                    correct: 1,
-                    explanation: "El Imperio Romano de Occidente cayó en el año 476 d.C.",
-                    category: "historia",
-                    image: "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 27,
-                    question: "¿Quién escribió 'El Quijote'?",
-                    options: ["Miguel de Cervantes", "Lope de Vega", "Calderón de la Barca", "Garcilaso de la Vega"],
-                    correct: 0,
-                    explanation: "Miguel de Cervantes escribió 'El Quijote'",
-                    category: "historia",
-                    image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 28,
-                    question: "¿Qué evento histórico ocurrió en 1789?",
-                    options: ["Revolución Francesa", "Independencia de EE.UU.", "Revolución Industrial", "Descubrimiento de América"],
-                    correct: 0,
-                    explanation: "La Revolución Francesa comenzó en 1789",
-                    category: "historia",
-                    image: "https://images.unsplash.com/photo-1577985057588-882ec0b8c0b0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 29,
-                    question: "¿Quién fue el primer hombre en pisar la Luna?",
-                    options: ["Neil Armstrong", "Buzz Aldrin", "Yuri Gagarin", "John Glenn"],
-                    correct: 0,
-                    explanation: "Neil Armstrong fue el primer hombre en pisar la Luna en 1969",
-                    category: "historia",
-                    image: "https://images.unsplash.com/photo-1446776877081-d282a0f896e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 30,
-                    question: "¿En qué año terminó la Segunda Guerra Mundial?",
-                    options: ["1943", "1944", "1945", "1946"],
-                    correct: 2,
-                    explanation: "La Segunda Guerra Mundial terminó en 1945",
-                    category: "historia",
-                    image: "https://images.unsplash.com/photo-1589656043592-47d46f5982d6?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
+        // CIENCIAS (10)
+        { id:11, question:"¿Qué planeta es conocido como el planeta rojo?", options:["Venus","Júpiter","Marte","Saturno"], correct:2, explanation:"Marte es el planeta rojo", category:"ciencias" },
+        { id:12, question:"¿Qué gas necesitan las plantas para realizar la fotosíntesis?", options:["Oxígeno","Nitrógeno","Dióxido de carbono","Hidrógeno"], correct:2, explanation:"Las plantas usan dióxido de carbono", category:"ciencias" },
+        { id:13, question:"¿Cuál es el elemento químico más abundante en el universo?", options:["Oxígeno","Carbono","Hierro","Hidrógeno"], correct:3, explanation:"El hidrógeno es el más abundante", category:"ciencias" },
+        { id:14, question:"¿Qué partícula subatómica tiene carga positiva?", options:["Electrón","Neutrón","Protón","Fotón"], correct:2, explanation:"El protón tiene carga positiva", category:"ciencias" },
+        { id:15, question:"¿Qué órgano bombea sangre en el cuerpo humano?", options:["Pulmón","Hígado","Corazón","Cerebro"], correct:2, explanation:"El corazón bombea la sangre", category:"ciencias" },
+        { id:16, question:"¿Qué planeta tiene anillos visibles?", options:["Marte","Venus","Saturno","Mercurio"], correct:2, explanation:"Saturno tiene anillos visibles", category:"ciencias" },
+        { id:17, question:"¿Qué científico formuló la teoría de la relatividad?", options:["Newton","Einstein","Galileo","Darwin"], correct:1, explanation:"Albert Einstein", category:"ciencias" },
+        { id:18, question:"¿Qué gas es esencial para la respiración humana?", options:["Nitrógeno","Oxígeno","Dióxido de carbono","Hidrógeno"], correct:1, explanation:"El oxígeno es esencial", category:"ciencias" },
+        { id:19, question:"¿Qué planeta es el más cercano al Sol?", options:["Venus","Mercurio","Tierra","Marte"], correct:1, explanation:"Mercurio es el más cercano", category:"ciencias" },
+        { id:20, question:"¿Qué tipo de animal es una ballena?", options:["Pez","Anfibio","Mamífero","Reptil"], correct:2, explanation:"La ballena es un mamífero", category:"ciencias" },
 
-                // GEOGRAFÍA (10 preguntas)
-                {
-                    id: 31,
-                    question: "¿Cuál es el río más largo del mundo?",
-                    options: ["Nilo", "Amazonas", "Misisipi", "Yangtsé"],
-                    correct: 1,
-                    explanation: "El río Amazonas es el más largo del mundo con aproximadamente 7,062 km",
-                    category: "geografia",
-                    image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 32,
-                    question: "¿Qué montaña es la más alta del mundo?",
-                    options: ["K2", "Monte Everest", "Kilimanjaro", "Aconcagua"],
-                    correct: 1,
-                    explanation: "El Monte Everest es la montaña más alta del mundo con 8,848 metros",
-                    category: "geografia",
-                    image: "https://images.unsplash.com/photo-1464822759849-e41f5bc90477?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 33,
-                    question: "¿Cuál es el país más grande del mundo por área?",
-                    options: ["China", "Estados Unidos", "Canadá", "Rusia"],
-                    correct: 3,
-                    explanation: "Rusia es el país más grande del mundo con más de 17 millones de km²",
-                    category: "geografia",
-                    image: "https://images.unsplash.com/photo-1526772662000-3f88f10405ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 34,
-                    question: "¿Qué océano es el más grande?",
-                    options: ["Atlántico", "Índico", "Pacífico", "Ártico"],
-                    correct: 2,
-                    explanation: "El océano Pacífico es el más grande, cubriendo aproximadamente un tercio de la superficie terrestre",
-                    category: "geografia",
-                    image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 35,
-                    question: "¿Cuál es la capital de Australia?",
-                    options: ["Sídney", "Melbourne", "Canberra", "Brisbane"],
-                    correct: 2,
-                    explanation: "Canberra es la capital de Australia",
-                    category: "geografia",
-                    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 36,
-                    question: "¿Qué desierto es el más grande del mundo?",
-                    options: ["Sahara", "Gobi", "Kalahari", "Antártico"],
-                    correct: 3,
-                    explanation: "El desierto Antártico es el más grande del mundo",
-                    category: "geografia",
-                    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 37,
-                    question: "¿Qué país tiene forma de bota?",
-                    options: ["Grecia", "Italia", "España", "Francia"],
-                    correct: 1,
-                    explanation: "Italia tiene forma de bota",
-                    category: "geografia",
-                    image: "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 38,
-                    question: "¿Cuál es el país más poblado del mundo?",
-                    options: ["India", "Estados Unidos", "China", "Indonesia"],
-                    correct: 2,
-                    explanation: "China es el país más poblado del mundo",
-                    category: "geografia",
-                    image: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 39,
-                    question: "¿Qué montaña separa Europa de Asia?",
-                    options: ["Alpes", "Himalaya", "Urales", "Andes"],
-                    correct: 2,
-                    explanation: "Los montes Urales separan Europa de Asia",
-                    category: "geografia",
-                    image: "https://images.unsplash.com/photo-1464822759849-e41f5bc90477?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 40,
-                    question: "¿Cuál es la capital de Canadá?",
-                    options: ["Toronto", "Vancouver", "Ottawa", "Montreal"],
-                    correct: 2,
-                    explanation: "Ottawa es la capital de Canadá",
-                    category: "geografia",
-                    image: "https://images.unsplash.com/photo-1517935706615-2717063c2225?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
+        // HISTORIA (10)
+        { id:21, question:"¿En qué año llegó Colón a América?", options:["1492","1502","1482","1512"], correct:0, explanation:"Cristóbal Colón llegó en 1492", category:"historia" },
+        { id:22, question:"¿Quién pintó la Mona Lisa?", options:["Miguel Ángel","Leonardo da Vinci","Picasso","Van Gogh"], correct:1, explanation:"Leonardo da Vinci", category:"historia" },
+        { id:23, question:"¿En qué año comenzó la Primera Guerra Mundial?", options:["1912","1914","1916","1918"], correct:1, explanation:"Comenzó en 1914", category:"historia" },
+        { id:24, question:"¿Quién fue el primer presidente de Estados Unidos?", options:["Thomas Jefferson","Abraham Lincoln","George Washington","John Adams"], correct:2, explanation:"George Washington", category:"historia" },
+        { id:25, question:"¿Qué civilización construyó las pirámides de Egipto?", options:["Romanos","Griegos","Egipcios","Mayas"], correct:2, explanation:"Los egipcios", category:"historia" },
+        { id:26, question:"¿En qué año cayó el Imperio Romano de Occidente?", options:["376 d.C.","476 d.C.","576 d.C.","676 d.C."], correct:1, explanation:"Cayó en 476 d.C.", category:"historia" },
+        { id:27, question:"¿Quién escribió 'El Quijote'?", options:["Miguel de Cervantes","Lope de Vega","Calderón de la Barca","Garcilaso de la Vega"], correct:0, explanation:"Miguel de Cervantes", category:"historia" },
+        { id:28, question:"¿Qué evento histórico ocurrió en 1789?", options:["Revolución Francesa","Independencia de EE.UU.","Revolución Industrial","Descubrimiento de América"], correct:0, explanation:"Revolución Francesa", category:"historia" },
+        { id:29, question:"¿Quién fue el primer hombre en pisar la Luna?", options:["Neil Armstrong","Buzz Aldrin","Yuri Gagarin","John Glenn"], correct:0, explanation:"Neil Armstrong en 1969", category:"historia" },
+        { id:30, question:"¿En qué año terminó la Segunda Guerra Mundial?", options:["1943","1944","1945","1946"], correct:2, explanation:"Terminó en 1945", category:"historia" },
 
-                // LITERATURA (10 preguntas)
-                {
-                    id: 41,
-                    question: "¿Quién escribió 'Cien años de soledad'?",
-                    options: ["Jorge Luis Borges", "Pablo Neruda", "Gabriel García Márquez", "Mario Vargas Llosa"],
-                    correct: 2,
-                    explanation: "'Cien años de soledad' fue escrita por Gabriel García Márquez",
-                    category: "literatura",
-                    image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 42,
-                    question: "¿Qué obra comienza con 'En un lugar de la Mancha...'?",
-                    options: ["El Lazarillo de Tormes", "La Celestina", "Don Quijote de la Mancha", "Fuenteovejuna"],
-                    correct: 2,
-                    explanation: "Don Quijote de la Mancha comienza con esas palabras",
-                    category: "literatura",
-                    image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 43,
-                    question: "¿Quién escribió 'Romeo y Julieta'?",
-                    options: ["Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"],
-                    correct: 1,
-                    explanation: "'Romeo y Julieta' fue escrita por William Shakespeare",
-                    category: "literatura",
-                    image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 44,
-                    question: "¿Qué autor escribió '1984'?",
-                    options: ["Aldous Huxley", "George Orwell", "Ray Bradbury", "H.G. Wells"],
-                    correct: 1,
-                    explanation: "'1984' fue escrita por George Orwell",
-                    category: "literatura",
-                    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 45,
-                    question: "¿Quién escribió 'La Odisea'?",
-                    options: ["Sófocles", "Homero", "Virgilio", "Esquilo"],
-                    correct: 1,
-                    explanation: "'La Odisea' fue escrita por Homero",
-                    category: "literatura",
-                    image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 46,
-                    question: "¿Qué escritor creó el personaje de Sherlock Holmes?",
-                    options: ["Agatha Christie", "Arthur Conan Doyle", "Edgar Allan Poe", "Charles Dickens"],
-                    correct: 1,
-                    explanation: "Arthur Conan Doyle creó a Sherlock Holmes",
-                    category: "literatura",
-                    image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 47,
-                    question: "¿Quién escribió 'Orgullo y prejuicio'?",
-                    options: ["Charlotte Brontë", "Jane Austen", "Emily Brontë", "Virginia Woolf"],
-                    correct: 1,
-                    explanation: "'Orgullo y prejuicio' fue escrita por Jane Austen",
-                    category: "literatura",
-                    image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 48,
-                    question: "¿Qué poeta chileno ganó el Premio Nobel de Literatura?",
-                    options: ["Jorge Luis Borges", "Octavio Paz", "Pablo Neruda", "Gabriela Mistral"],
-                    correct: 2,
-                    explanation: "Pablo Neruda ganó el Premio Nobel de Literatura en 1971",
-                    category: "literatura",
-                    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 49,
-                    question: "¿Quién escribió 'El principito'?",
-                    options: ["Jules Verne", "Antoine de Saint-Exupéry", "Victor Hugo", "Albert Camus"],
-                    correct: 1,
-                    explanation: "'El principito' fue escrito por Antoine de Saint-Exupéry",
-                    category: "literatura",
-                    image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 50,
-                    question: "¿Qué autor escribió 'Crimen y castigo'?",
-                    options: ["León Tolstói", "Fiódor Dostoyevski", "Antón Chéjov", "Nikolái Gógol"],
-                    correct: 1,
-                    explanation: "'Crimen y castigo' fue escrita por Fiódor Dostoyevski",
-                    category: "literatura",
-                    image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
+        // GEOGRAFÍA (10)
+        { id:31, question:"¿Cuál es el río más largo del mundo?", options:["Nilo","Amazonas","Misisipi","Yangtsé"], correct:1, explanation:"Amazonas (aprox. 7,062 km)", category:"geografia" },
+        { id:32, question:"¿Qué montaña es la más alta del mundo?", options:["K2","Monte Everest","Kilimanjaro","Aconcagua"], correct:1, explanation:"Monte Everest (≈8,848 m)", category:"geografia" },
+        { id:33, question:"¿Cuál es el país más grande del mundo por área?", options:["China","Estados Unidos","Canadá","Rusia"], correct:3, explanation:"Rusia (≈17 millones km²)", category:"geografia" },
+        { id:34, question:"¿Qué océano es el más grande?", options:["Atlántico","Índico","Pacífico","Ártico"], correct:2, explanation:"Océano Pacífico", category:"geografia" },
+        { id:35, question:"¿Cuál es la capital de Australia?", options:["Sídney","Melbourne","Canberra","Brisbane"], correct:2, explanation:"Canberra", category:"geografia" },
+        { id:36, question:"¿Qué desierto es el más grande del mundo?", options:["Sahara","Gobi","Kalahari","Antártico"], correct:3, explanation:"El desierto Antártico es el más grande", category:"geografia" },
+        { id:37, question:"¿Qué país tiene forma de bota?", options:["Grecia","Italia","España","Francia"], correct:1, explanation:"Italia", category:"geografia" },
+        { id:38, question:"¿Cuál es el país más poblado del mundo?", options:["India","Estados Unidos","China","Indonesia"], correct:2, explanation:"China", category:"geografia" },
+        { id:39, question:"¿Qué montaña separa Europa de Asia?", options:["Alpes","Himalaya","Urales","Andes"], correct:2, explanation:"Montes Urales", category:"geografia" },
+        { id:40, question:"¿Cuál es la capital de Canadá?", options:["Toronto","Vancouver","Ottawa","Montreal"], correct:2, explanation:"Ottawa", category:"geografia" },
 
-                // ARTE (10 preguntas)
-                {
-                    id: 51,
-                    question: "¿Quién pintó 'La noche estrellada'?",
-                    options: ["Pablo Picasso", "Claude Monet", "Vincent van Gogh", "Salvador Dalí"],
-                    correct: 2,
-                    explanation: "'La noche estrellada' fue pintada por Vincent van Gogh",
-                    category: "arte",
-                    image: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 52,
-                    question: "¿Qué estilo artístico se caracteriza por formas geométricas y colores planos?",
-                    options: ["Impresionismo", "Cubismo", "Surrealismo", "Expresionismo"],
-                    correct: 1,
-                    explanation: "El cubismo se caracteriza por formas geométricas y colores planos",
-                    category: "arte",
-                    image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 53,
-                    question: "¿Quién esculpió 'El David'?",
-                    options: ["Donatello", "Miguel Ángel", "Leonardo da Vinci", "Bernini"],
-                    correct: 1,
-                    explanation: "'El David' fue esculpido por Miguel Ángel",
-                    category: "arte",
-                    image: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 54,
-                    question: "¿Qué artista es conocido por sus obras de arte pop como 'Latas de sopa Campbell'?",
-                    options: ["Andy Warhol", "Roy Lichtenstein", "Keith Haring", "Jackson Pollock"],
-                    correct: 0,
-                    explanation: "Andy Warhol es conocido por sus obras de arte pop como 'Latas de sopa Campbell'",
-                    category: "arte",
-                    image: "https://images.unsplash.com/photo-1578303512596-44d7e896c8e7?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 55,
-                    question: "¿Quién pintó 'El grito'?",
-                    options: ["Vincent van Gogh", "Edvard Munch", "Pablo Picasso", "Salvador Dalí"],
-                    correct: 1,
-                    explanation: "'El grito' fue pintado por Edvard Munch",
-                    category: "arte",
-                    image: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 56,
-                    question: "¿Qué artista español es conocido por su periodo azul y rosa?",
-                    options: ["Salvador Dalí", "Pablo Picasso", "Joan Miró", "Diego Velázquez"],
-                    correct: 1,
-                    explanation: "Pablo Picasso es conocido por sus periodos azul y rosa",
-                    category: "arte",
-                    image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 57,
-                    question: "¿Qué pintor impresionista pintó 'Nenúfares'?",
-                    options: ["Claude Monet", "Pierre-Auguste Renoir", "Edgar Degas", "Paul Cézanne"],
-                    correct: 0,
-                    explanation: "Claude Monet pintó la serie 'Nenúfares'",
-                    category: "arte",
-                    image: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 58,
-                    question: "¿Qué artista pintó 'La última cena'?",
-                    options: ["Miguel Ángel", "Rafael", "Leonardo da Vinci", "Caravaggio"],
-                    correct: 2,
-                    explanation: "'La última cena' fue pintada por Leonardo da Vinci",
-                    category: "arte",
-                    image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 59,
-                    question: "¿Qué movimiento artístico se caracteriza por representar sueños y el subconsciente?",
-                    options: ["Cubismo", "Surrealismo", "Expresionismo", "Dadaísmo"],
-                    correct: 1,
-                    explanation: "El surrealismo se caracteriza por representar sueños y el subconsciente",
-                    category: "arte",
-                    image: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 60,
-                    question: "¿Quién es el autor de 'Las meninas'?",
-                    options: ["Francisco de Goya", "Diego Velázquez", "El Greco", "Bartolomé Esteban Murillo"],
-                    correct: 1,
-                    explanation: "'Las meninas' fue pintada por Diego Velázquez",
-                    category: "arte",
-                    image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
+        // LITERATURA (10)
+        { id:41, question:"¿Quién escribió 'Cien años de soledad'?", options:["Jorge Luis Borges","Pablo Neruda","Gabriel García Márquez","Mario Vargas Llosa"], correct:2, explanation:"Gabriel García Márquez", category:"literatura" },
+        { id:42, question:"¿Qué obra comienza con 'En un lugar de la Mancha...'?", options:["El Lazarillo de Tormes","La Celestina","Don Quijote de la Mancha","Fuenteovejuna"], correct:2, explanation:"Don Quijote de la Mancha", category:"literatura" },
+        { id:43, question:"¿Quién escribió 'Romeo y Julieta'?", options:["Charles Dickens","William Shakespeare","Jane Austen","Mark Twain"], correct:1, explanation:"William Shakespeare", category:"literatura" },
+        { id:44, question:"¿Qué autor escribió '1984'?", options:["Aldous Huxley","George Orwell","Ray Bradbury","H.G. Wells"], correct:1, explanation:"George Orwell", category:"literatura" },
+        { id:45, question:"¿Quién escribió 'La Odisea'?", options:["Sófocles","Homero","Virgilio","Esquilo"], correct:1, explanation:"Homero", category:"literatura" },
+        { id:46, question:"¿Qué escritor creó el personaje de Sherlock Holmes?", options:["Agatha Christie","Arthur Conan Doyle","Edgar Allan Poe","Charles Dickens"], correct:1, explanation:"Arthur Conan Doyle", category:"literatura" },
+        { id:47, question:"¿Quién escribió 'Orgullo y prejuicio'?", options:["Charlotte Brontë","Jane Austen","Emily Brontë","Virginia Woolf"], correct:1, explanation:"Jane Austen", category:"literatura" },
+        { id:48, question:"¿Qué poeta chileno ganó el Premio Nobel de Literatura?", options:["Jorge Luis Borges","Octavio Paz","Pablo Neruda","Gabriela Mistral"], correct:2, explanation:"Pablo Neruda (1971)", category:"literatura" },
+        { id:49, question:"¿Quién escribió 'El principito'?", options:["Jules Verne","Antoine de Saint-Exupéry","Victor Hugo","Albert Camus"], correct:1, explanation:"Antoine de Saint-Exupéry", category:"literatura" },
+        { id:50, question:"¿Qué autor escribió 'Crimen y castigo'?", options:["León Tolstói","Fiódor Dostoyevski","Antón Chéjov","Nikolái Gógol"], correct:1, explanation:"Fiódor Dostoyevski", category:"literatura" },
 
-                // DEPORTES (10 preguntas)
-                {
-                    id: 61,
-                    question: "¿En qué deporte se utiliza un bate y una pelota?",
-                    options: ["Fútbol", "Béisbol", "Baloncesto", "Tenis"],
-                    correct: 1,
-                    explanation: "En el béisbol se utiliza un bate para golpear la pelota",
-                    category: "deportes",
-                    image: "https://images.unsplash.com/photo-1549638441-b787d2e11f14?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 62,
-                    question: "¿Cuántos jugadores hay en un equipo de fútbol en el campo?",
-                    options: ["9", "10", "11", "12"],
-                    correct: 2,
-                    explanation: "Un equipo de fútbol tiene 11 jugadores en el campo",
-                    category: "deportes",
-                    image: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 63,
-                    question: "¿En qué deporte se anotan 'canastas'?",
-                    options: ["Fútbol", "Baloncesto", "Tenis", "Voleibol"],
-                    correct: 1,
-                    explanation: "En el baloncesto se anotan canastas",
-                    category: "deportes",
-                    image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 64,
-                    question: "¿Qué país ha ganado más Copas del Mundo de fútbol?",
-                    options: ["Alemania", "Italia", "Brasil", "Argentina"],
-                    correct: 2,
-                    explanation: "Brasil ha ganado 5 Copas del Mundo de fútbol",
-                    category: "deportes",
-                    image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 65,
-                    question: "¿En qué deporte se usa una raqueta y una pelota amarilla?",
-                    options: ["Bádminton", "Tenis", "Ping pong", "Squash"],
-                    correct: 1,
-                    explanation: "En el tenis se usa una raqueta y una pelota amarilla",
-                    category: "deportes",
-                    image: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 66,
-                    question: "¿Cuántos jugadores hay en un equipo de baloncesto en la cancha?",
-                    options: ["4", "5", "6", "7"],
-                    correct: 1,
-                    explanation: "En baloncesto hay 5 jugadores por equipo en la cancha",
-                    category: "deportes",
-                    image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 67,
-                    question: "¿Qué deporte practica Tiger Woods?",
-                    options: ["Tenis", "Golf", "Fútbol", "Béisbol"],
-                    correct: 1,
-                    explanation: "Tiger Woods es un famoso golfista",
-                    category: "deportes",
-                    image: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 68,
-                    question: "¿En qué deporte se nada en diferentes estilos como mariposa y espalda?",
-                    options: ["Natación", "Waterpolo", "Buceo", "Esquí acuático"],
-                    correct: 0,
-                    explanation: "En natación se compite en diferentes estilos",
-                    category: "deportes",
-                    image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 69,
-                    question: "¿Qué país organizó los Juegos Olímpicos de 2016?",
-                    options: ["China", "Reino Unido", "Brasil", "Rusia"],
-                    correct: 2,
-                    explanation: "Brasil organizó los Juegos Olímpicos de 2016 en Río de Janeiro",
-                    category: "deportes",
-                    image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 70,
-                    question: "¿En qué deporte se lanza un disco y una jabalina?",
-                    options: ["Atletismo", "Gimnasia", "Halterofilia", "Ciclismo"],
-                    correct: 0,
-                    explanation: "En atletismo se lanzan disco y jabalina",
-                    category: "deportes",
-                    image: "https://images.unsplash.com/photo-1549638441-b787d2e11f14?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
+        // ARTE (10)
+        { id:51, question:"¿Quién pintó 'La noche estrellada'?", options:["Pablo Picasso","Claude Monet","Vincent van Gogh","Salvador Dalí"], correct:2, explanation:"Vincent van Gogh", category:"arte" },
+        { id:52, question:"¿Qué estilo artístico se caracteriza por formas geométricas y colores planos?", options:["Impresionismo","Cubismo","Surrealismo","Expresionismo"], correct:1, explanation:"Cubismo", category:"arte" },
+        { id:53, question:"¿Quién esculpió 'El David'?", options:["Donatello","Miguel Ángel","Leonardo da Vinci","Bernini"], correct:1, explanation:"Miguel Ángel", category:"arte" },
+        { id:54, question:"¿Qué artista es conocido por sus obras de arte pop como 'Latas de sopa Campbell'?", options:["Andy Warhol","Roy Lichtenstein","Keith Haring","Jackson Pollock"], correct:0, explanation:"Andy Warhol", category:"arte" },
+        { id:55, question:"¿Quién pintó 'El grito'?", options:["Vincent van Gogh","Edvard Munch","Pablo Picasso","Salvador Dalí"], correct:1, explanation:"Edvard Munch", category:"arte" },
+        { id:56, question:"¿Qué artista español es conocido por su periodo azul y rosa?", options:["Salvador Dalí","Pablo Picasso","Joan Miró","Diego Velázquez"], correct:1, explanation:"Pablo Picasso", category:"arte" },
+        { id:57, question:"¿Qué pintor impresionista pintó 'Nenúfares'?", options:["Claude Monet","Pierre-Auguste Renoir","Edgar Degas","Paul Cézanne"], correct:0, explanation:"Claude Monet", category:"arte" },
+        { id:58, question:"¿Qué artista pintó 'La última cena'?", options:["Miguel Ángel","Rafael","Leonardo da Vinci","Caravaggio"], correct:2, explanation:"Leonardo da Vinci", category:"arte" },
+        { id:59, question:"¿Qué movimiento artístico se caracteriza por representar sueños y el subconsciente?", options:["Cubismo","Surrealismo","Expresionismo","Dadaísmo"], correct:1, explanation:"Surrealismo", category:"arte" },
+        { id:60, question:"¿Quién es el autor de 'Las meninas'?", options:["Francisco de Goya","Diego Velázquez","El Greco","Bartolomé Esteban Murillo"], correct:1, explanation:"Diego Velázquez", category:"arte" },
 
-                // TECNOLOGÍA (10 preguntas)
-                {
-                    id: 71,
-                    question: "¿Qué compañía creó el iPhone?",
-                    options: ["Samsung", "Microsoft", "Apple", "Google"],
-                    correct: 2,
-                    explanation: "Apple creó el iPhone",
-                    category: "tecnologia",
-                    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 72,
-                    question: "¿Qué significa HTML?",
-                    options: ["HyperText Markup Language", "HighTech Modern Language", "HyperTransfer Machine Learning", "Home Tool Markup Language"],
-                    correct: 0,
-                    explanation: "HTML significa HyperText Markup Language",
-                    category: "tecnologia",
-                    image: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 73,
-                    question: "¿Qué compañía es dueña de Android?",
-                    options: ["Apple", "Microsoft", "Google", "Samsung"],
-                    correct: 2,
-                    explanation: "Google es dueño del sistema operativo Android",
-                    category: "tecnologia",
-                    image: "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 74,
-                    question: "¿Qué significa 'URL'?",
-                    options: ["Universal Resource Locator", "Uniform Resource Locator", "Universal Reference Link", "Uniform Reference Link"],
-                    correct: 1,
-                    explanation: "URL significa Uniform Resource Locator",
-                    category: "tecnologia",
-                    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 75,
-                    question: "¿Qué empresa fundó Mark Zuckerberg?",
-                    options: ["Twitter", "Facebook", "Instagram", "WhatsApp"],
-                    correct: 1,
-                    explanation: "Mark Zuckerberg fundó Facebook",
-                    category: "tecnologia",
-                    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 76,
-                    question: "¿Qué significa 'Wi-Fi'?",
-                    options: ["Wireless Fidelity", "Wide Fidelity", "Wireless Frequency", "Wide Frequency"],
-                    correct: 0,
-                    explanation: "Wi-Fi significa Wireless Fidelity",
-                    category: "tecnologia",
-                    image: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 77,
-                    question: "¿Qué compañía desarrolló el sistema operativo Windows?",
-                    options: ["Apple", "Microsoft", "Google", "IBM"],
-                    correct: 1,
-                    explanation: "Microsoft desarrolló Windows",
-                    category: "tecnologia",
-                    image: "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 78,
-                    question: "¿Qué significa 'CPU'?",
-                    options: ["Central Processing Unit", "Computer Processing Unit", "Central Program Unit", "Computer Program Unit"],
-                    correct: 0,
-                    explanation: "CPU significa Central Processing Unit",
-                    category: "tecnologia",
-                    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 79,
-                    question: "¿Qué navegador web desarrolló Google?",
-                    options: ["Firefox", "Safari", "Chrome", "Edge"],
-                    correct: 2,
-                    explanation: "Google desarrolló Chrome",
-                    category: "tecnologia",
-                    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                },
-                {
-                    id: 80,
-                    question: "¿Qué empresa creó el PlayStation?",
-                    options: ["Microsoft", "Nintendo", "Sony", "Sega"],
-                    correct: 2,
-                    explanation: "Sony creó PlayStation",
-                    category: "tecnologia",
-                    image: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                }
-            ];
-        }
+        // DEPORTES (10)
+        { id:61, question:"¿En qué deporte se utiliza un bate y una pelota?", options:["Fútbol","Béisbol","Baloncesto","Tenis"], correct:1, explanation:"Béisbol", category:"deportes" },
+        { id:62, question:"¿Cuántos jugadores hay en un equipo de fútbol en el campo?", options:["9","10","11","12"], correct:2, explanation:"11 jugadores", category:"deportes" },
+        { id:63, question:"¿En qué deporte se anotan 'canastas'?", options:["Fútbol","Baloncesto","Tenis","Voleibol"], correct:1, explanation:"Baloncesto", category:"deportes" },
+        { id:64, question:"¿Qué país ha ganado más Copas del Mundo de fútbol?", options:["Alemania","Italia","Brasil","Argentina"], correct:2, explanation:"Brasil (5)", category:"deportes" },
+        { id:65, question:"¿En qué deporte se usa una raqueta y una pelota amarilla?", options:["Bádminton","Tenis","Ping pong","Squash"], correct:1, explanation:"Tenis", category:"deportes" },
+        { id:66, question:"¿Cuántos jugadores hay en un equipo de baloncesto en la cancha?", options:["4","5","6","7"], correct:1, explanation:"5 jugadores", category:"deportes" },
+        { id:67, question:"¿Qué deporte practica Tiger Woods?", options:["Tenis","Golf","Fútbol","Béisbol"], correct:1, explanation:"Golf", category:"deportes" },
+        { id:68, question:"¿En qué deporte se nada en diferentes estilos como mariposa y espalda?", options:["Natación","Waterpolo","Buceo","Esquí acuático"], correct:0, explanation:"Natación", category:"deportes" },
+        { id:69, question:"¿Qué país organizó los Juegos Olímpicos de 2016?", options:["China","Reino Unido","Brasil","Rusia"], correct:2, explanation:"Brasil (Río de Janeiro)", category:"deportes" },
+        { id:70, question:"¿En qué deporte se lanza un disco y una jabalina?", options:["Atletismo","Gimnasia","Halterofilia","Ciclismo"], correct:0, explanation:"Atletismo", category:"deportes" },
 
-        // Variables globales
-        const allQuestions = generateQuestions();
-        let currentQuestions = [];
-        let currentQuestionIndex = 0;
-        let userAnswers = [];
-        let timer;
-        let timeLeft = 60; // 1 minuto en segundos
-        let selectedCategory = null;
+        // TECNOLOGÍA (10)
+        { id:71, question:"¿Qué compañía creó el iPhone?", options:["Samsung","Microsoft","Apple","Google"], correct:2, explanation:"Apple", category:"tecnologia" },
+        { id:72, question:"¿Qué significa HTML?", options:["HyperText Markup Language","HighTech Modern Language","HyperTransfer Machine Learning","Home Tool Markup Language"], correct:0, explanation:"HyperText Markup Language", category:"tecnologia" },
+        { id:73, question:"¿Qué compañía es dueña de Android?", options:["Apple","Microsoft","Google","Samsung"], correct:2, explanation:"Google", category:"tecnologia" },
+        { id:74, question:"¿Qué significa 'URL'?", options:["Universal Resource Locator","Uniform Resource Locator","Universal Reference Link","Uniform Reference Link"], correct:1, explanation:"Uniform Resource Locator", category:"tecnologia" },
+        { id:75, question:"¿Qué empresa fundó Mark Zuckerberg?", options:["Twitter","Facebook","Instagram","WhatsApp"], correct:1, explanation:"Facebook", category:"tecnologia" },
+        { id:76, question:"¿Qué significa 'Wi-Fi'?", options:["Wireless Fidelity","Wide Fidelity","Wireless Frequency","Wide Frequency"], correct:0, explanation:"Wireless Fidelity", category:"tecnologia" },
+        { id:77, question:"¿Qué compañía desarrolló el sistema operativo Windows?", options:["Apple","Microsoft","Google","IBM"], correct:1, explanation:"Microsoft", category:"tecnologia" },
+        { id:78, question:"¿Qué significa 'CPU'?", options:["Central Processing Unit","Computer Processing Unit","Central Program Unit","Computer Program Unit"], correct:0, explanation:"Central Processing Unit", category:"tecnologia" },
+        { id:79, question:"¿Qué navegador web desarrolló Google?", options:["Firefox","Safari","Chrome","Edge"], correct:2, explanation:"Chrome", category:"tecnologia" },
+        { id:80, question:"¿Qué empresa creó el PlayStation?", options:["Microsoft","Nintendo","Sony","Sega"], correct:2, explanation:"Sony", category:"tecnologia" }
+    ];
+}
 
-        // Elementos DOM
-        const categoryScreen = document.getElementById('category-screen');
-        const quizScreen = document.getElementById('quiz-screen');
-        const resultsScreen = document.getElementById('results-screen');
-        const categoriesContainer = document.getElementById('categories-container');
-        const startBtn = document.getElementById('start-btn');
-        const questionText = document.getElementById('question-text');
-        const questionImage = document.getElementById('question-image');
-        const questionCategory = document.getElementById('question-category');
-        const optionsContainer = document.getElementById('options-container');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const questionNumber = document.getElementById('question-number');
-        const currentQuestionSpan = document.getElementById('current-question');
-        const timeDisplay = document.getElementById('time');
-        const finalScore = document.getElementById('final-score');
-        const resultMessage = document.getElementById('result-message');
-        const resultsSummary = document.getElementById('results-summary');
-        const restartBtn = document.getElementById('restart-btn');
+/* -------------------------
+   Estado y elementos DOM
+   ------------------------- */
+const allQuestions = generateQuestions();
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let userAnswers = [];
+let timer, timeLeft = 60;
+let selectedCategory = null;
 
-        // Inicializar la aplicación
-        function initApp() {
-            renderCategories();
-            setupEventListeners();
-        }
+/* DOM */
+const categoryScreen = document.getElementById('category-screen');
+const quizScreen = document.getElementById('quiz-screen');
+const resultsScreen = document.getElementById('results-screen');
+const categoriesContainer = document.getElementById('categories-container');
+const startBtn = document.getElementById('start-btn');
+const questionText = document.getElementById('question-text');
+const questionCategory = document.getElementById('question-category');
+const optionsContainer = document.getElementById('options-container');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+const questionNumber = document.getElementById('question-number');
+const currentQuestionSpan = document.getElementById('current-question');
+const timeDisplay = document.getElementById('time');
+const finalScore = document.getElementById('final-score');
+const resultMessage = document.getElementById('result-message');
+const resultsSummary = document.getElementById('results-summary');
+const restartBtn = document.getElementById('restart-btn');
+const feedbackDiv = document.getElementById('feedback');
+const confettiCanvas = document.getElementById('confetti-canvas');
+const app = document.getElementById('app');
 
-        // Renderizar las categorías en la pantalla de selección
-        function renderCategories() {
-            categoriesContainer.innerHTML = '';
-            
-            categories.forEach(category => {
-                const categoryCard = document.createElement('div');
-                categoryCard.classList.add('category-card');
-                categoryCard.dataset.id = category.id;
-                
-                categoryCard.innerHTML = `
-                    <div class="category-icon">${category.icon}</div>
-                    <div class="category-name">${category.name}</div>
-                `;
-                
-                categoryCard.addEventListener('click', () => selectCategory(category.id));
-                categoriesContainer.appendChild(categoryCard);
-            });
-        }
+/* -------------------------
+   Inicializar app
+   ------------------------- */
+function initApp(){
+    renderCategories();
+    setupEventListeners();
+}
+window.onload = initApp;
 
-        // Seleccionar categoría
-        function selectCategory(categoryId) {
-            // Deseleccionar todas las categorías
-            document.querySelectorAll('.category-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            
-            // Seleccionar la categoría clickeada
-            const categoryCard = document.querySelector(`.category-card[data-id="${categoryId}"]`);
-            categoryCard.classList.add('selected');
-            
-            selectedCategory = categoryId;
-            startBtn.disabled = false;
-        }
+/* -------------------------
+   Render categorías
+   ------------------------- */
+function renderCategories(){
+    categoriesContainer.innerHTML = '';
+    categories.forEach(cat=>{
+        const card = document.createElement('div');
+        card.className = 'category-card';
+        card.dataset.id = cat.id;
+        card.innerHTML = `<div class="category-icon">${cat.icon}</div><div class="category-name">${cat.name}</div>`;
+        card.addEventListener('click', ()=> selectCategory(cat.id, card));
+        categoriesContainer.appendChild(card);
+    });
+}
 
-        // Configurar event listeners
-        function setupEventListeners() {
-            startBtn.addEventListener('click', startQuiz);
-            prevBtn.addEventListener('click', prevQuestion);
-            nextBtn.addEventListener('click', nextQuestion);
-            restartBtn.addEventListener('click', restartQuiz);
-        }
+function selectCategory(categoryId, cardEl){
+    document.querySelectorAll('.category-card').forEach(c=>c.classList.remove('selected'));
+    cardEl.classList.add('selected');
+    selectedCategory = categoryId;
+    startBtn.disabled = false;
+}
 
-        // Iniciar el cuestionario
-        function startQuiz() {
-            // Obtener preguntas según la categoría seleccionada
-            if (selectedCategory === 'mixtas') {
-                // Para preguntas mixtas, seleccionar de todas las categorías
-                currentQuestions = getRandomQuestions(allQuestions, 10);
-            } else {
-                // Para categorías específicas, obtener solo preguntas de esa categoría
-                const questionsFromCategory = allQuestions.filter(question => 
-                    question.category === selectedCategory
-                );
-                currentQuestions = getRandomQuestions(questionsFromCategory, 10);
-            }
-            
-            currentQuestionIndex = 0;
-            userAnswers = Array(10).fill(null);
-            
-            // Iniciar temporizador
-            startTimer();
-            
-            // Mostrar primera pregunta
-            showQuestion();
-            
-            // Cambiar a pantalla de cuestionario
-            categoryScreen.classList.add('hidden');
-            quizScreen.classList.remove('hidden');
-            resultsScreen.classList.add('hidden');
-        }
+/* -------------------------
+   Event listeners
+   ------------------------- */
+function setupEventListeners(){
+    startBtn.addEventListener('click', startQuiz);
+    prevBtn.addEventListener('click', prevQuestion);
+    nextBtn.addEventListener('click', nextQuestion);
+    restartBtn.addEventListener('click', restartQuiz);
+}
 
-        // Obtener preguntas aleatorias
-        function getRandomQuestions(questions, count) {
-            if (questions.length <= count) return questions;
-            
-            const shuffled = [...questions].sort(() => 0.5 - Math.random());
-            return shuffled.slice(0, count);
-        }
+/* -------------------------
+   Iniciar cuestionario
+   ------------------------- */
+function startQuiz(){
+    if(selectedCategory === 'mixtas'){
+        currentQuestions = getRandomQuestions(allQuestions, 10);
+    } else {
+        const pool = allQuestions.filter(q=> q.category === selectedCategory);
+        currentQuestions = getRandomQuestions(pool, 10);
+    }
+    currentQuestionIndex = 0;
+    userAnswers = Array(10).fill(null);
+    startTimer();
+    showQuestion();
+    categoryScreen.style.display = 'none';
+    quizScreen.style.display = 'block';
+    resultsScreen.style.display = 'none';
+}
 
-        // Mostrar pregunta actual
-        function showQuestion() {
-            const question = currentQuestions[currentQuestionIndex];
-            const categoryInfo = categories.find(cat => cat.id === question.category);
-            
-            questionText.textContent = question.question;
-            questionNumber.textContent = currentQuestionIndex + 1;
-            currentQuestionSpan.textContent = currentQuestionIndex + 1;
-            
-            // Mostrar categoría
-            questionCategory.textContent = categoryInfo.name;
-            questionCategory.style.backgroundColor = categoryInfo.color;
-            questionCategory.style.color = 'white';
-            
-            // Mostrar imagen
-            questionImage.src = question.image;
-            questionImage.alt = `Imagen para pregunta sobre ${categoryInfo.name}`;
-            
-            // Limpiar opciones anteriores
-            optionsContainer.innerHTML = '';
-            
-            // Agregar nuevas opciones
-            question.options.forEach((option, index) => {
-                const optionElement = document.createElement('div');
-                optionElement.classList.add('option');
-                
-                if (userAnswers[currentQuestionIndex] === index) {
-                    optionElement.classList.add('selected');
-                }
-                
-                const optionLetter = document.createElement('span');
-                optionLetter.classList.add('option-letter');
-                optionLetter.textContent = String.fromCharCode(65 + index);
-                
-                const optionText = document.createElement('span');
-                optionText.textContent = option;
-                
-                optionElement.appendChild(optionLetter);
-                optionElement.appendChild(optionText);
-                optionElement.addEventListener('click', () => selectOption(index));
-                
-                optionsContainer.appendChild(optionElement);
-            });
-            
-            // Actualizar botones de navegación
-            prevBtn.disabled = currentQuestionIndex === 0;
-            
-            if (currentQuestionIndex === 9) {
-                nextBtn.textContent = 'Finalizar';
-            } else {
-                nextBtn.textContent = 'Siguiente';
-            }
-        }
+/* -------------------------
+   Random questions
+   ------------------------- */
+function getRandomQuestions(questions, count){
+    if(questions.length <= count) return [...questions];
+    return [...questions].sort(()=>0.5 - Math.random()).slice(0,count);
+}
 
-        // Seleccionar una opción
-        function selectOption(optionIndex) {
-            userAnswers[currentQuestionIndex] = optionIndex;
-            showQuestion();
-        }
+/* -------------------------
+   Mostrar pregunta
+   ------------------------- */
+function showQuestion(){
+    const q = currentQuestions[currentQuestionIndex];
+    const catInfo = categories.find(c=> c.id === q.category) || {name:'', color:'#888'};
 
-        // Navegar a la pregunta anterior
-        function prevQuestion() {
-            if (currentQuestionIndex > 0) {
-                currentQuestionIndex--;
-                showQuestion();
-            }
-        }
+    questionText.textContent = q.question;
+    questionNumber.textContent = currentQuestionIndex + 1;
+    currentQuestionSpan.textContent = currentQuestionIndex + 1;
 
-        // Navegar a la siguiente pregunta o finalizar
-        function nextQuestion() {
-            if (currentQuestionIndex < 9) {
-                currentQuestionIndex++;
-                showQuestion();
-            } else {
-                finishQuiz();
-            }
-        }
+    questionCategory.textContent = catInfo.name;
+    questionCategory.style.backgroundColor = catInfo.color;
+    questionCategory.style.color = '#fff';
 
-        // Iniciar temporizador
-        function startTimer() {
-            clearInterval(timer);
-            timeLeft = 60;
-            updateTimerDisplay();
-            
-            timer = setInterval(() => {
-                timeLeft--;
-                updateTimerDisplay();
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    finishQuiz();
-                }
-            }, 1000);
-        }
+    // opciones
+    optionsContainer.innerHTML = '';
+    q.options.forEach((opt, idx)=>{
+        const el = document.createElement('div');
+        el.className = 'option';
+        if(userAnswers[currentQuestionIndex] === idx) el.classList.add('selected');
 
-        // Actualizar display del temporizador
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            // Cambiar color cuando quede poco tiempo
-            if (timeLeft <= 10) {
-                timeDisplay.style.color = '#dc3545';
-            }
-        }
+        const letter = document.createElement('div');
+        letter.className = 'option-letter';
+        letter.textContent = String.fromCharCode(65 + idx);
 
-        // Finalizar cuestionario
-        function finishQuiz() {
-            clearInterval(timer);
-            
-            // Calcular puntuación
-            let score = 0;
-            currentQuestions.forEach((question, index) => {
-                if (userAnswers[index] === question.correct) {
-                    score++;
-                }
-            });
-            
-            // Mostrar resultados
-            finalScore.textContent = `${score}/10`;
-            
-            // Mensaje según la puntuación
-            if (score >= 9) {
-                resultMessage.textContent = "¡Excelente! Has demostrado un gran conocimiento.";
-            } else if (score >= 7) {
-                resultMessage.textContent = "¡Buen trabajo! Tienes un buen nivel de conocimiento.";
-            } else if (score >= 5) {
-                resultMessage.textContent = "Resultado aceptable. Sigue practicando para mejorar.";
-            } else {
-                resultMessage.textContent = "Necesitas repasar más. ¡No te rindas!";
-            }
-            
-            // Mostrar resumen de respuestas
-            resultsSummary.innerHTML = '';
-            currentQuestions.forEach((question, index) => {
-                const resultItem = document.createElement('div');
-                resultItem.classList.add('result-item');
-                
-                const isCorrect = userAnswers[index] === question.correct;
-                const answerClass = isCorrect ? 'correct' : 'incorrect';
-                const userAnswerText = userAnswers[index] !== null ? 
-                    `${String.fromCharCode(65 + userAnswers[index])}. ${question.options[userAnswers[index]]}` : 
-                    'Sin responder';
-                const correctAnswerText = `${String.fromCharCode(65 + question.correct)}. ${question.options[question.correct]}`;
-                const categoryInfo = categories.find(cat => cat.id === question.category);
-                
-                resultItem.innerHTML = `
-                    <div class="result-question">${index + 1}. ${question.question}</div>
-                    <div class="category-tag" style="background-color: ${categoryInfo.color}; color: white;">${categoryInfo.name}</div>
-                    <img class="result-image" src="${question.image}" alt="Imagen de la pregunta">
-                    <div class="result-answer">
-                        <span>Tu respuesta: <span class="${answerClass}">${userAnswerText}</span></span>
-                        <span>Respuesta correcta: <span class="correct">${correctAnswerText}</span></span>
+        const text = document.createElement('div');
+        text.textContent = opt;
+
+        el.appendChild(letter);
+        el.appendChild(text);
+
+        el.addEventListener('click', ()=> selectOption(idx));
+        optionsContainer.appendChild(el);
+    });
+
+    prevBtn.disabled = currentQuestionIndex === 0;
+    nextBtn.textContent = currentQuestionIndex === 9 ? 'Finalizar' : 'Siguiente';
+}
+
+/* -------------------------
+   Seleccionar opción (feedback inmediato)
+   ------------------------- */
+function selectOption(optionIndex){
+    const q = currentQuestions[currentQuestionIndex];
+
+    // Guardar respuesta
+    userAnswers[currentQuestionIndex] = optionIndex;
+
+    // Marcar seleccionado visualmente
+    // (re-render opciones)
+    showQuestion();
+
+    // Mostrar feedback inmediato
+    if(optionIndex === q.correct){
+        showFeedbackCorrect();
+    } else {
+        showFeedbackIncorrect();
+    }
+}
+
+/* -------------------------
+   Feedback: Correcto (confeti + cohete)
+   ------------------------- */
+function showFeedbackCorrect(){
+    // texto
+    feedbackDiv.className = 'feedback correct show';
+    feedbackDiv.innerHTML = `✅ ¡Correcto! <span style="margin-left:8px">🎉🚀</span>`;
+
+    // confetti por toda la pantalla
+    confettiBurst(80);
+
+    // ocultar después
+    setTimeout(()=>{ feedbackDiv.classList.remove('show'); }, 1600);
+}
+
+/* -------------------------
+   Feedback: Incorrecto (X roja + carita triste + vibración)
+   ------------------------- */
+function showFeedbackIncorrect(){
+    feedbackDiv.className = 'feedback incorrect show';
+    feedbackDiv.innerHTML = `❌ Incorrecto <span style="margin-left:8px">😢</span>`;
+
+    // efecto de temblor en contenedor de opciones
+    optionsContainer.classList.add('shake');
+    setTimeout(()=>{ optionsContainer.classList.remove('shake'); }, 480);
+
+    // vibrar si el dispositivo lo permite
+    if(window.navigator && navigator.vibrate){
+        navigator.vibrate([80,40,80]);
+    }
+
+    setTimeout(()=>{ feedbackDiv.classList.remove('show'); }, 1400);
+}
+
+/* -------------------------
+   Navegación preguntas
+   ------------------------- */
+function prevQuestion(){ if(currentQuestionIndex > 0){ currentQuestionIndex--; showQuestion(); } }
+function nextQuestion(){ if(currentQuestionIndex < 9){ currentQuestionIndex++; showQuestion(); } else { finishQuiz(); } }
+
+/* -------------------------
+   Temporizador
+   ------------------------- */
+function startTimer(){
+    clearInterval(timer);
+    timeLeft = 60;
+    updateTimerDisplay();
+    timer = setInterval(()=>{
+        timeLeft--;
+        updateTimerDisplay();
+        if(timeLeft <= 0){ clearInterval(timer); finishQuiz(); }
+    },1000);
+}
+function updateTimerDisplay(){
+    const m = Math.floor(timeLeft/60);
+    const s = timeLeft%60;
+    timeDisplay.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if(timeLeft <= 10){ timeDisplay.style.color = '#dc3545'; } else { timeDisplay.style.color = ''; }
+}
+
+/* -------------------------
+   Finalizar y mostrar resultados
+   ------------------------- */
+function finishQuiz(){
+    clearInterval(timer);
+    let score = 0;
+    currentQuestions.forEach((q,i)=>{ if(userAnswers[i] === q.correct) score++; });
+
+    finalScore.textContent = `${score}/10`;
+    if(score >= 9) resultMessage.textContent = "¡Excelente! Has demostrado un gran conocimiento.";
+    else if(score >= 7) resultMessage.textContent = "¡Buen trabajo! Tienes un buen nivel de conocimiento.";
+    else if(score >= 5) resultMessage.textContent = "Resultado aceptable. Sigue practicando para mejorar.";
+    else resultMessage.textContent = "Necesitas repasar más. ¡No te rindas!";
+
+    // Resumen
+    resultsSummary.innerHTML = '';
+    currentQuestions.forEach((q,i)=>{
+        const isCorrect = userAnswers[i] === q.correct;
+        const userAnsText = userAnswers[i] !== null ? `${String.fromCharCode(65+userAnswers[i])}. ${q.options[userAnswers[i]]}` : 'Sin responder';
+        const correctText = `${String.fromCharCode(65+q.correct)}. ${q.options[q.correct]}`;
+        const catInfo = categories.find(c=> c.id === q.category) || {color:'#999', name:q.category};
+
+        const item = document.createElement('div');
+        item.className = 'result-item';
+        item.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+                <div style="min-width:60%"><div class="result-question">${i+1}. ${q.question}</div>
+                <div style="margin-top:6px;"><span class="category-tag" style="background:${catInfo.color};color:#fff;padding:6px 10px;border-radius:999px;font-weight:700">${catInfo.name}</span></div></div>
+                <div style="text-align:right;min-width:30%">
+                    <div style="font-weight:900; font-size:1.05rem; ${isCorrect ? 'color:#28a745' : 'color:#dc3545'}">
+                        ${isCorrect ? '✅ Correcto 😁' : '❌ Incorrecto 😞'}
                     </div>
-                    <div><small>${question.explanation}</small></div>
-                `;
-                
-                resultsSummary.appendChild(resultItem);
+                </div>
+            </div>
+            <div style="margin-top:8px; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                <div>Tu respuesta: <strong class="${isCorrect ? 'correct' : 'incorrect'}">${userAnsText}</strong></div>
+                <div>Respuesta correcta: <strong class="correct">${correctText}</strong></div>
+            </div>
+            <div style="margin-top:8px;"><small>${q.explanation}</small></div>
+        `;
+        resultsSummary.appendChild(item);
+    });
+
+    // Cambiar pantallas
+    quizScreen.style.display = 'none';
+    resultsScreen.style.display = 'block';
+}
+
+/* -------------------------
+   Reiniciar
+   ------------------------- */
+function restartQuiz(){
+    selectedCategory = null;
+    document.querySelectorAll('.category-card').forEach(c=>c.classList.remove('selected'));
+    startBtn.disabled = true;
+    categoryScreen.style.display = 'block';
+    quizScreen.style.display = 'none';
+    resultsScreen.style.display = 'none';
+}
+
+/* -------------------------
+   Confetti system (canvas particles)
+   ------------------------- */
+(function setupConfetti(){
+    const ctx = confettiCanvas.getContext('2d');
+    let W = confettiCanvas.width = app.clientWidth;
+    let H = confettiCanvas.height = app.clientHeight;
+    const particles = [];
+    let animating = false;
+
+    // Resize canvas with container
+    function resize(){
+        W = confettiCanvas.width = app.clientWidth;
+        H = confettiCanvas.height = app.clientHeight;
+    }
+    window.addEventListener('resize', resize);
+
+    // Colors for confetti
+    const COLORS = ['#ff5c9e','#ffd166','#4ecdc4','#7209b7','#ff9e64','#4a00e0','#2575fc','#ffd6e0'];
+
+    function random(min, max){ return Math.random()*(max-min)+min; }
+
+    // Create burst
+    window.confettiBurst = function(count=60){
+        for(let i=0;i<count;i++){
+            particles.push({
+                x: random(0, W),
+                y: random(-20, H/3),
+                w: random(6,12),
+                h: random(8,14),
+                vx: random(-3.5,3.5),
+                vy: random(1,5),
+                angle: random(0, Math.PI*2),
+                angularVel: random(-0.15,0.15),
+                color: COLORS[Math.floor(Math.random()*COLORS.length)],
+                ttl: random(80,160),
+                gravity: random(0.02,0.12),
+                drag: 0.995
             });
-            
-            // Cambiar a pantalla de resultados
-            quizScreen.classList.add('hidden');
-            resultsScreen.classList.remove('hidden');
+        }
+        if(!animating){ animating = true; requestAnimationFrame(update); }
+    };
+
+    // Animation loop
+    function update(){
+        ctx.clearRect(0,0,W,H);
+        for(let i=particles.length-1;i>=0;i--){
+            const p = particles[i];
+            p.vy += p.gravity;
+            p.vx *= p.drag;
+            p.vy *= p.drag;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.angle += p.angularVel;
+            p.ttl--;
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.angle);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+            ctx.restore();
+
+            if(p.y > H + 40 || p.ttl <= 0) particles.splice(i,1);
         }
 
-        // Reiniciar cuestionario
-        function restartQuiz() {
-            // Limpiar selección
-            selectedCategory = null;
-            document.querySelectorAll('.category-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            startBtn.disabled = true;
-            
-            // Volver a pantalla de selección de categorías
-            categoryScreen.classList.remove('hidden');
-            quizScreen.classList.add('hidden');
-            resultsScreen.classList.add('hidden');
-        }
+        if(particles.length>0){ requestAnimationFrame(update); } else { animating = false; ctx.clearRect(0,0,W,H); }
+    }
+})();
 
-        // Iniciar la aplicación
-        window.onload = initApp;
-    </script>
+/* -------------------------
+   Fin del script
+   ------------------------- */
+</script>
 </body>
 </html>
