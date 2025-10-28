@@ -699,3 +699,4 @@ function restartQuiz(){
 </script>
 </body>
 </html>
+  
